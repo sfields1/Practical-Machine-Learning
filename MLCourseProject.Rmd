@@ -6,10 +6,10 @@ output:
   html_document: default
   pdf_document: default
 ---
-#Background  
+# Background  
 Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).  
 
-#Data  
+# Data  
 The training data for this project are available here:
 
 https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
@@ -18,18 +18,18 @@ The test data are available here:
 
 https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv  
 
-##Assignment  
+## Assignment  
 The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.  
 
 Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file describing your analysis. Please constrain the text of the writeup to < 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online (and you always want to make it easy on graders.  
 
 You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details.  
 
-##Reproducible Work  
+## Reproducible Work  
 
 To ensure reproducibility, a seed has been set at 1234 for this analysis. The packages used are all shown being loaded below.  
 
-##The Model  
+## The Model  
 
 The variable we are trying to predict is the "classe" variable. This variable is used to identify in which way participants performed one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl. There are 5 levels of this variable:  
 
@@ -41,14 +41,14 @@ The variable we are trying to predict is the "classe" variable. This variable is
 
 After cleaning our data to remove irrelevant and mostly NA variables, all of the remaining variables will be used for prediction. Decision tree and random forst algorithms will be used. The model with a higher accuracy will be the model that is used on the testing data. 
 
-##Cross Validation  
+## Cross Validation  
 To cross validate, we will split our training data into to sets; one will contain 70% of the data and the other will contain 30%. The models we use will be fitted on the new training set (70%) and tested on the new testing set (30%).  
 
 ##Expected out-of-sample error  
 
 The expected out-of-sample error will be equal to 1 minus the accuracy in the cross-validation data. Accuracy is the proportion of correct classified observations over the total sample size of the new testing data. Expected accuracy is the expected accuracy of the original testing data. Thus, the expected value of the out-of-sample error will correspond to the expected number of misclassified observations divided by the total number of observations in the test set.  
 
-#Loading packages and setting the seed.
+# Loading packages and setting the seed.
 
 
 ```{r, warning=FALSE, message=FALSE}
@@ -60,21 +60,21 @@ library(rattle)
 
 set.seed(1234)
 ```  
-#Reading in the data  
+# Reading in the data  
 
 ```{r, message=FALSE}
 pml.testing <- read.csv("pml-testing.csv", na.strings = c("NA", "#DIV/0!",""))
 pml.training <- read.csv("pml-training.csv", na.strings = c("NA", "#DIV/0!",""))
 ```  
 
-#Splitting our data into two sets
+# Splitting our data into two sets
 ```{r}
 inTrain <- createDataPartition(y = pml.training$classe, p = 0.70, list = FALSE)
 training2 <- pml.training[inTrain,]
 testing2 <- pml.training[-inTrain,]
 ```  
 
-#Cleanining the training and new testing data
+# Cleanining the training and new testing data
 The following code will remove the identifier, timestamp, and window columns as they cannot be used for prediction. It will also remove all columns that have NA rates above 95%.  
 ```{r}
 excvars <- grep("name|timestamp|window|X", colnames(pml.training), value = FALSE)
@@ -95,7 +95,7 @@ summary(training3) #this would show a summary of training3
 summary(testing3) #testing 3
 ```  
 
-#Decision Tree  
+# Decision Tree  
 
 This portion will be applying the decision tree method.  
 
@@ -108,7 +108,7 @@ Viewing the decision tree:
 fancyRpartPlot(mod_DT)
 ```  
 
-###Predicting using decision tree  
+### Predicting using decision tree  
 
 ```{r}
 pred_DT <- predict(mod_DT, testing3, type = "class")
@@ -122,7 +122,7 @@ confusionMatrix(pred_DT, testing3$classe)
 
 The accuracy shown in the matrix is `r confusionMatrix(pred_DT, testing2$classe)$overall[1]`  
 
-#Random Forest  
+# Random Forest  
 
 This portion will be applying the random forest method.  
 
@@ -131,7 +131,7 @@ mod_RF <- randomForest(classe ~ ., data = training3)
 mod_RF
 ```  
 
-###Predicting using random forests  
+### Predicting using random forests  
 
 ```{r}
 pred_RF <- predict(mod_RF, testing3, type = "class")
@@ -146,6 +146,6 @@ confusionMatrix(pred_RF, testing3$classe)
 The accuracy for this confusion matrix is `r confusionMatrix(pred_RF, testing3$classe)$overall[1]`  
 
 
-#Decision  
+# Decision  
 
 The random forest method performed significantly better than the decision tree, so it will be used for the original testing set. With such a high accuracy, we expect very few, if any, of our test set to be misclassified. 
